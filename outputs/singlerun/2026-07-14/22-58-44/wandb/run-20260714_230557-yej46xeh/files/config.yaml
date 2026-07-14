@@ -1,0 +1,194 @@
+_wandb:
+    value:
+        cli_version: 0.28.0
+        e:
+            o0zvkbyyfukyn1hx1pvbp3ttbuksf0c6:
+                args:
+                    - --config-name=hea
+                cpu_count: 10
+                cpu_count_logical: 20
+                cudaVersion: "13.1"
+                disk:
+                    /:
+                        total: "1081101176832"
+                        used: "42676256768"
+                email: wangzywave13@gmail.com
+                executable: /home/wang_zy/miniconda3/envs/mattergen/bin/python3
+                git:
+                    commit: ac9ddd406171138c3f037d06b9b53fedbbb1c536
+                    remote: https://github.com/microsoft/mattergen.git
+                gpu: NVIDIA GeForce RTX 4070
+                gpu_count: 1
+                gpu_nvidia:
+                    - architecture: Ada
+                      memoryTotal: "12878610432"
+                      name: NVIDIA GeForce RTX 4070
+                      uuid: GPU-d57a5129-2e3d-a0d9-61d4-97b4d8ccfca9
+                host: DESKTOP-WANGZIYI
+                memory:
+                    total: "33523339264"
+                os: Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.39
+                program: /home/wang_zy/miniconda3/envs/mattergen/bin/mattergen-train
+                python: CPython 3.10.20
+                root: .
+                startedAt: "2026-07-14T15:05:57.181861Z"
+                writerId: o0zvkbyyfukyn1hx1pvbp3ttbuksf0c6
+        m:
+            - "1": trainer/global_step
+              "6":
+                - 3
+              "7": []
+            - "2": '*'
+              "5": 1
+              "6":
+                - 1
+              "7": []
+        python_version: 3.10.20
+        t:
+            "1":
+                - 1
+                - 9
+                - 41
+                - 50
+                - 103
+            "2":
+                - 1
+                - 9
+                - 41
+                - 50
+                - 77
+                - 103
+                - 105
+            "3":
+                - 7
+                - 66
+            "4": 3.10.20
+            "5": 0.28.0
+            "12": 0.28.0
+            "13": linux-x86_64
+auto_resume:
+    value: true
+checkpoint_path:
+    value: null
+data_module:
+    value:
+        _recursive_: true
+        _target_: mattergen.common.data.datamodule.CrystDataModule
+        batch_size:
+            train: 512
+            val: 512
+        max_epochs: 2200
+        num_workers:
+            train: 0
+            val: 0
+        root_dir: /mnt/d/HEAs/HEA-gen/mattergen/../datasets/cache/hea
+        train_dataset:
+            _target_: mattergen.common.data.dataset.CrystalDataset.from_cache_path
+            cache_path: /mnt/d/HEAs/HEA-gen/mattergen/../datasets/cache/hea/train
+        val_dataset:
+            _target_: mattergen.common.data.dataset.CrystalDataset.from_cache_path
+            cache_path: /mnt/d/HEAs/HEA-gen/mattergen/../datasets/cache/hea/val
+lightning_module:
+    value:
+        _target_: mattergen.diffusion.lightning_module.DiffusionLightningModule
+        diffusion_module:
+            _target_: mattergen.diffusion.diffusion_module.DiffusionModule
+            corruption:
+                _target_: mattergen.diffusion.corruption.multi_corruption.MultiCorruption
+                discrete_corruptions:
+                    atomic_numbers:
+                        _target_: mattergen.diffusion.corruption.d3pm_corruption.D3PMCorruption
+                        d3pm:
+                            _target_: mattergen.diffusion.d3pm.d3pm.MaskDiffusion
+                            dim: 101
+                            schedule:
+                                _target_: mattergen.diffusion.d3pm.d3pm.create_discrete_diffusion_schedule
+                                kind: standard
+                                num_steps: 1000
+                        offset: 1
+            loss_fn:
+                _target_: mattergen.common.loss.MaterialsLoss
+                d3pm_hybrid_lambda: 0.01
+                include_atomic_numbers: true
+                include_cell: false
+                include_pos: false
+                reduce: sum
+            model:
+                _target_: mattergen.denoiser.GemNetTDenoiser
+                atom_type_diffusion: mask
+                denoise_atom_types: true
+                gemnet:
+                    _target_: mattergen.common.gemnet.gemnet.GemNetT
+                    atom_embedding:
+                        _target_: mattergen.common.gemnet.layers.embedding_block.AtomEmbedding
+                        emb_size: 512
+                        with_mask_type: true
+                    cutoff: 7
+                    emb_size_atom: 512
+                    emb_size_edge: 512
+                    latent_dim: 512
+                    max_cell_images_per_dim: 5
+                    max_neighbors: 50
+                    num_blocks: 4
+                    num_targets: 1
+                    otf_graph: true
+                    regress_stress: true
+                    scale_file: /mnt/d/HEAs/HEA-gen/mattergen/common/gemnet/gemnet-dT.json
+                hidden_dim: 512
+            pre_corruption_fn: null
+        optimizer_partial:
+            _partial_: true
+            _target_: torch.optim.Adam
+            lr: 0.0001
+        scheduler_partials:
+            - frequency: 1
+              interval: epoch
+              monitor: loss_train
+              scheduler:
+                _partial_: true
+                _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+                factor: 0.6
+                min_lr: 1e-06
+                patience: 100
+                verbose: true
+              strict: true
+load_original:
+    value: false
+trainer:
+    value:
+        _target_: pytorch_lightning.Trainer
+        accelerator: gpu
+        accumulate_grad_batches: 1
+        callbacks:
+            - _target_: pytorch_lightning.callbacks.LearningRateMonitor
+              log_momentum: false
+              logging_interval: step
+            - _target_: pytorch_lightning.callbacks.ModelCheckpoint
+              every_n_epochs: 1
+              filename: '{epoch}-{loss_val:.2f}'
+              mode: min
+              monitor: loss_val
+              save_last: true
+              save_top_k: 1
+              verbose: false
+            - _target_: pytorch_lightning.callbacks.TQDMProgressBar
+              refresh_rate: 50
+            - _target_: mattergen.common.data.callback.SetPropertyScalers
+        check_val_every_n_epoch: 5
+        devices: 1
+        gradient_clip_algorithm: value
+        gradient_clip_val: 0.5
+        logger:
+            _target_: pytorch_lightning.loggers.WandbLogger
+            job_type: train
+            project: crystal-generation
+            settings:
+                _save_requirements: false
+                _target_: wandb.Settings
+                start_method: fork
+        max_epochs: 2200
+        num_nodes: 1
+        precision: 32
+        strategy:
+            _target_: pytorch_lightning.strategies.ddp.DDPStrategy
+            find_unused_parameters: true

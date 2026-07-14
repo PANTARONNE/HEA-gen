@@ -1,0 +1,16 @@
+sampler_partial:
+  _target_: mattergen.diffusion.sampling.pc_sampler.PredictorCorrector.from_pl_module
+  _partial_: true
+  N: 1000
+  eps_t: ${eval:'1/${.N}'}
+  n_steps_corrector: 1
+  # Only atom types are sampled; positions and cell stay fixed at the template.
+  predictor_partials:
+    atomic_numbers:
+      _target_: mattergen.diffusion.d3pm.d3pm_predictors_correctors.D3PMAncestralSamplingPredictor
+      predict_x0: True
+      _partial_: true
+
+condition_loader_partial:
+  _partial_: true
+  _target_: mattergen.common.data.condition_factory.get_hea_template_loader

@@ -1,0 +1,6 @@
+- data_module.batch_size.train=32
+- data_module.batch_size.val=32
+- trainer.max_epochs=3
+- trainer.check_val_every_n_epoch=1
+- ~trainer.logger
+- trainer.callbacks=[]

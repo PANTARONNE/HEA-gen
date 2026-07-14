@@ -132,6 +132,12 @@ SELECTED_ATOMIC_NUMBERS = [
 ]
 MAX_ATOMIC_NUM = 100
 
+# Element pool for the high-entropy-alloy (HEA) atom-type-only generation task.
+# One-based atomic numbers: Fe, Co, Ni, Cu, Zn, Ga, Mo, Sn, W.
+# Used to hard-mask disallowed elements at sampling time so that only these
+# elements can be generated.
+HEA_ATOMIC_NUMBERS = [26, 27, 28, 29, 30, 31, 42, 50, 74]
+
 
 # Set `eval` resolver
 def try_eval(s):

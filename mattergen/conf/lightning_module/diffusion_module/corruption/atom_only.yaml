@@ -1,0 +1,13 @@
+_target_: mattergen.diffusion.corruption.multi_corruption.MultiCorruption
+# Only atom types are corrupted; positions and cell are fixed (no SDEs).
+discrete_corruptions:
+  atomic_numbers:
+    _target_: mattergen.diffusion.corruption.d3pm_corruption.D3PMCorruption
+    offset: 1
+    d3pm:
+      _target_: mattergen.diffusion.d3pm.d3pm.MaskDiffusion
+      dim: 101
+      schedule:
+        _target_: mattergen.diffusion.d3pm.d3pm.create_discrete_diffusion_schedule
+        kind: standard
+        num_steps: 1000

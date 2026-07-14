@@ -155,4 +155,8 @@ class DiffusionModule(torch.nn.Module, Generic[T]):
         )
 
     def _get_device(self, batch: T) -> torch.device:
-        return next(batch[k].device for k in self.corruption.sdes.keys())
+        # Use `corrupted_fields` (which includes discrete corruptions such as
+        # atomic_numbers) rather than `sdes.keys()`, so that models with only
+        # discrete corruptions (e.g. atom-type-only diffusion) do not crash with
+        # StopIteration when `sdes` is empty.
+        return next(batch[k].device for k in self.corruption.corrupted_fields)

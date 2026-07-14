@@ -1,0 +1,40 @@
+{
+  "os": "Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "python": "CPython 3.10.20",
+  "startedAt": "2026-07-14T15:05:57.181861Z",
+  "args": [
+    "--config-name=hea"
+  ],
+  "program": "/home/wang_zy/miniconda3/envs/mattergen/bin/mattergen-train",
+  "git": {
+    "remote": "https://github.com/microsoft/mattergen.git",
+    "commit": "ac9ddd406171138c3f037d06b9b53fedbbb1c536"
+  },
+  "email": "wangzywave13@gmail.com",
+  "root": ".",
+  "host": "DESKTOP-WANGZIYI",
+  "executable": "/home/wang_zy/miniconda3/envs/mattergen/bin/python3",
+  "cpu_count": 10,
+  "cpu_count_logical": 20,
+  "gpu": "NVIDIA GeForce RTX 4070",
+  "gpu_count": 1,
+  "disk": {
+    "/": {
+      "total": "1081101176832",
+      "used": "42676256768"
+    }
+  },
+  "memory": {
+    "total": "33523339264"
+  },
+  "gpu_nvidia": [
+    {
+      "name": "NVIDIA GeForce RTX 4070",
+      "memoryTotal": "12878610432",
+      "architecture": "Ada",
+      "uuid": "GPU-d57a5129-2e3d-a0d9-61d4-97b4d8ccfca9"
+    }
+  ],
+  "cudaVersion": "13.1",
+  "writerId": "o0zvkbyyfukyn1hx1pvbp3ttbuksf0c6"
+}

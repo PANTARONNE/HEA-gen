@@ -8,7 +8,11 @@ import torch.nn as nn
 
 from mattergen.common.data.chemgraph import ChemGraph
 from mattergen.common.data.types import PropertySourceId
-from mattergen.common.utils.globals import MAX_ATOMIC_NUM, SELECTED_ATOMIC_NUMBERS
+from mattergen.common.utils.globals import (
+    HEA_ATOMIC_NUMBERS,
+    MAX_ATOMIC_NUM,
+    SELECTED_ATOMIC_NUMBERS,
+)
 from mattergen.diffusion.model_utils import NoiseLevelEncoding
 from mattergen.diffusion.score_models.base import ScoreModel
 from mattergen.property_embeddings import (
@@ -123,6 +127,34 @@ def mask_disallowed_elements(
         logits = mask_logits(logits, keep_logits[batch_idx])
 
     return logits
+
+
+def mask_to_hea_elements(
+    logits: torch.FloatTensor,
+    x: ChemGraph | None = None,
+    batch_idx: torch.LongTensor | None = None,
+    predictions_are_zero_based: bool = True,
+) -> torch.FloatTensor:
+    """Mask out every atom type that is not part of the HEA element pool.
+
+    Restricts the atom-type logits to the 9 elements in
+    `HEA_ATOMIC_NUMBERS` (Fe, Co, Ni, Cu, Zn, Ga, Mo, Sn, W) by setting the
+    logits of all other elements to -inf. Applied only at sampling time (see
+    `get_chemgraph_from_denoiser_output`), so training is unaffected.
+
+    Args mirror `mask_disallowed_elements`; `x`/`batch_idx` are accepted for a
+    compatible signature but unused, since the allowed set is fixed.
+    """
+    allowed_atomic_numbers = torch.tensor(HEA_ATOMIC_NUMBERS, device=logits.device)
+    predictions_are_one_based = not predictions_are_zero_based
+    # (num_allowed, num_classes)
+    one_hot_allowed = atomic_numbers_to_mask(
+        atomic_numbers=allowed_atomic_numbers + int(predictions_are_one_based),
+        max_atomic_num=logits.shape[1],
+    )
+    # (1, num_classes): 1 where element is allowed, 0 otherwise
+    k_hot_mask = one_hot_allowed.sum(0)[None]
+    return mask_logits(logits=logits, mask=k_hot_mask)
 
 
 def get_chemgraph_from_denoiser_output(

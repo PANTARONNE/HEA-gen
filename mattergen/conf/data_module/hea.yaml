@@ -1,0 +1,26 @@
+_target_: mattergen.common.data.datamodule.CrystDataModule
+_recursive_: true
+
+# Data is already anchored to the canonical DEFAULT_A FCC(111) grid by
+# prepare_hea_dataset.py: all structures share identical positions/cell and
+# differ only in atom types. No transforms are needed (cell is not diffused,
+# no properties are conditioned on).
+root_dir: ${oc.env:PROJECT_ROOT}/../datasets/cache/hea
+
+train_dataset:
+  _target_: mattergen.common.data.dataset.CrystalDataset.from_cache_path
+  cache_path: ${data_module.root_dir}/train
+
+val_dataset:
+  _target_: mattergen.common.data.dataset.CrystalDataset.from_cache_path
+  cache_path: ${data_module.root_dir}/val
+
+num_workers:
+  train: 0
+  val: 0
+
+batch_size:
+  train: ${eval:'(512 // ${trainer.accumulate_grad_batches}) // (${trainer.devices} * ${trainer.num_nodes})'}
+  val: ${eval:'(512 // ${trainer.accumulate_grad_batches}) // (${trainer.devices} * ${trainer.num_nodes})'}
+
+max_epochs: 2200

@@ -1,0 +1,14 @@
+_target_: mattergen.diffusion.diffusion_module.DiffusionModule
+model: mattergen
+corruption: atom_only
+
+loss_fn:
+  _target_: mattergen.common.loss.MaterialsLoss
+  reduce: sum
+  include_pos: False
+  include_cell: False
+  include_atomic_numbers: True
+  d3pm_hybrid_lambda: 0.01
+
+# No conditioning -> no classifier-free-guidance embedding dropout.
+pre_corruption_fn: null
