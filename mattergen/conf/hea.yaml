@@ -6,7 +6,7 @@ auto_resume: true
 
 defaults:
   - data_module: hea
-  - trainer: default
+  - trainer: hea
   - lightning_module: default
   - lightning_module/diffusion_module: atom_only
   - lightning_module/diffusion_module/model: mattergen
