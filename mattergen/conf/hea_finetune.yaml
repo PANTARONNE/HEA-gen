@@ -1,0 +1,26 @@
+hydra:
+  run:
+    dir: ${oc.env:OUTPUT_DIR,outputs/hea_finetune/${now:%Y-%m-%d}/${now:%H-%M-%S}}
+
+auto_resume: true
+
+defaults:
+  - data_module: hea
+  - trainer: hea
+  - lightning_module: default
+  - lightning_module/diffusion_module: atom_only
+  - lightning_module/diffusion_module/model: mattergen
+  - lightning_module/diffusion_module/corruption: atom_only
+
+lightning_module:
+  optimizer_partial:
+    lr: 5e-6
+
+trainer:
+  accumulate_grad_batches: 1
+
+data_module:
+  max_epochs: 400
+  batch_size:
+    train: ${eval:'64 // (${trainer.devices} * ${trainer.num_nodes})'}
+    val: ${eval:'64 // (${trainer.devices} * ${trainer.num_nodes})'}

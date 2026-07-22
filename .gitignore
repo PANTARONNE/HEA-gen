@@ -402,3 +402,6 @@ FodyWeavers.xsd
 
 # train outputs
 outputs/
+
+# checkpoint files
+checkpoints/
