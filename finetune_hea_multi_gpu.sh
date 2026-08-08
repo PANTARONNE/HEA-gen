@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-GPUS="${GPUS:-0,6}"
+OUTPUT_DIR=outputs/hea_finetune_run
+
+GPUS="${GPUS:-2,6}"
 export CUDA_VISIBLE_DEVICES="${GPUS}"
 
 NUM_GPUS="$(awk -F',' '{print NF}' <<< "${GPUS}")"
@@ -21,7 +23,7 @@ echo "   trainer.num_nodes    = ${NUM_NODES}"
 echo "=========================================================="
 
 mattergen-train \
-    --config-name=hea \
+    --config-name=hea_finetune \
     trainer.devices="${NUM_GPUS}" \
     trainer.num_nodes="${NUM_NODES}" \
     "$@"

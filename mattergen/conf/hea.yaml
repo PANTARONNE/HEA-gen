@@ -11,3 +11,16 @@ defaults:
   - lightning_module/diffusion_module: atom_only
   - lightning_module/diffusion_module/model: mattergen
   - lightning_module/diffusion_module/corruption: atom_only
+
+lightning_module:
+  optimizer_partial:
+    lr: 5e-5
+
+trainer:
+  accumulate_grad_batches: 4
+
+data_module:
+  max_epochs: 600
+  batch_size:
+    train: ${eval:'(64 // ${trainer.accumulate_grad_batches}) // (${trainer.devices} * ${trainer.num_nodes})'}
+    val: ${eval:'(64 // ${trainer.accumulate_grad_batches}) // (${trainer.devices} * ${trainer.num_nodes})'}

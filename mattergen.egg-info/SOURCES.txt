@@ -65,12 +65,17 @@ mattergen/common/utils/ocp_graph_utils.py
 mattergen/conf/csp.yaml
 mattergen/conf/default.yaml
 mattergen/conf/finetune.yaml
+mattergen/conf/hea.yaml
+mattergen/conf/hea_finetune.yaml
 mattergen/conf/adapter/default.yaml
 mattergen/conf/data_module/alex_mp_20.yaml
+mattergen/conf/data_module/hea.yaml
 mattergen/conf/data_module/mp_20.yaml
 mattergen/conf/lightning_module/default.yaml
+mattergen/conf/lightning_module/diffusion_module/atom_only.yaml
 mattergen/conf/lightning_module/diffusion_module/csp.yaml
 mattergen/conf/lightning_module/diffusion_module/default.yaml
+mattergen/conf/lightning_module/diffusion_module/corruption/atom_only.yaml
 mattergen/conf/lightning_module/diffusion_module/corruption/csp.yaml
 mattergen/conf/lightning_module/diffusion_module/corruption/default.yaml
 mattergen/conf/lightning_module/diffusion_module/model/mattergen.yaml
@@ -83,6 +88,7 @@ mattergen/conf/lightning_module/diffusion_module/model/property_embeddings/hhi_s
 mattergen/conf/lightning_module/diffusion_module/model/property_embeddings/ml_bulk_modulus.yaml
 mattergen/conf/lightning_module/diffusion_module/model/property_embeddings/space_group.yaml
 mattergen/conf/trainer/default.yaml
+mattergen/conf/trainer/hea.yaml
 mattergen/diffusion/__init__.py
 mattergen/diffusion/cgmanifest.json
 mattergen/diffusion/config.py
@@ -164,6 +170,7 @@ mattergen/scripts/csv_to_dataset.py
 mattergen/scripts/evaluate.py
 mattergen/scripts/finetune.py
 mattergen/scripts/generate.py
+mattergen/scripts/generate_hea.py
 mattergen/scripts/prepare_hea_dataset.py
 mattergen/scripts/run.py
 mattergen/tests/__init__.py

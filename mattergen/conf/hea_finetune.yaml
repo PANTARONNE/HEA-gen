@@ -17,10 +17,10 @@ lightning_module:
     lr: 5e-6
 
 trainer:
-  accumulate_grad_batches: 1
+  accumulate_grad_batches: 4
 
 data_module:
   max_epochs: 400
   batch_size:
-    train: ${eval:'64 // (${trainer.devices} * ${trainer.num_nodes})'}
-    val: ${eval:'64 // (${trainer.devices} * ${trainer.num_nodes})'}
+    train: ${eval:'(64 // ${trainer.accumulate_grad_batches}) // (${trainer.devices} * ${trainer.num_nodes})'}
+    val: ${eval:'(64 // ${trainer.accumulate_grad_batches}) // (${trainer.devices} * ${trainer.num_nodes})'}
