@@ -1,6 +1,10 @@
 hydra:
   run:
-    dir: ${oc.env:OUTPUT_DIR,outputs/hea_finetune/${now:%Y-%m-%d}/${now:%H-%M-%S}}
+    # finetune_hea_multi_gpu.sh exports OUTPUT_DIR so that weight injection and
+    # training share one run dir. The fallback keeps the same layout for a bare
+    # `mattergen-train --config-name=hea_finetune`, but note that such a run gets
+    # a fresh empty dir and therefore NO warm start - use the script instead.
+    dir: ${oc.env:OUTPUT_DIR,outputs/hea_finetune_run/${now:%Y-%m-%d}/${now:%H-%M-%S}}
 
 auto_resume: true
 
