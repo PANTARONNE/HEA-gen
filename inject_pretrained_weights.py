@@ -38,13 +38,15 @@ Run this on the machine/env where you'll fine-tune (conda env `mattergen`).
 """
 
 import argparse
-import os
 from collections import OrderedDict
 from pathlib import Path
 
+import pytorch_lightning as pl
 import torch
 from hydra import compose, initialize_config_dir
 from hydra.utils import instantiate
+from omegaconf import OmegaConf
+from torch.utils.data import DataLoader, Dataset
 
 from mattergen.common.utils.globals import MODELS_PROJECT_ROOT
 from mattergen.diffusion.lightning_module import DiffusionLightningModule
@@ -61,17 +63,49 @@ def _resolve_ckpt(path: Path) -> Path:
     raise FileNotFoundError(f"Pretrained path does not exist: {path}")
 
 
-def build_atom_only_module(config_name: str) -> DiffusionLightningModule:
+class _NoOpDataset(Dataset):
+    def __len__(self) -> int:
+        return 1
+
+    def __getitem__(self, idx: int) -> torch.Tensor:
+        return torch.tensor(0)
+
+
+def build_atom_only_module(config_name: str) -> tuple[DiffusionLightningModule, dict]:
     """Instantiate the lightning module exactly as training would."""
     with initialize_config_dir(str((MODELS_PROJECT_ROOT / "conf").absolute()), version_base="1.1"):
         cfg = compose(config_name=config_name)
     module = instantiate(cfg.lightning_module)
     assert isinstance(module, DiffusionLightningModule)
-    return module
+    config_dict = OmegaConf.to_container(cfg, resolve=True)
+    assert isinstance(config_dict, dict)
+    return module, config_dict
+
+
+def save_resume_checkpoint(module: DiffusionLightningModule, config: dict, out_path: Path) -> None:
+    """Save a checkpoint with Lightning loop state, so Trainer.fit can resume it."""
+    trainer = pl.Trainer(
+        accelerator="cpu",
+        devices=1,
+        max_steps=0,
+        logger=False,
+        enable_checkpointing=False,
+        enable_model_summary=False,
+        enable_progress_bar=False,
+    )
+    trainer.fit(module, train_dataloaders=DataLoader(_NoOpDataset(), batch_size=1))
+    trainer.save_checkpoint(out_path)
+
+    ckpt = torch.load(out_path, map_location="cpu")
+    ckpt["state_dict"] = module.state_dict()
+    ckpt["config"] = config
+    ckpt["epoch"] = 0
+    ckpt["global_step"] = 0
+    torch.save(ckpt, out_path)
 
 
 def inject(pretrained: Path, output_dir: Path, config_name: str) -> Path:
-    module = build_atom_only_module(config_name)
+    module, config = build_atom_only_module(config_name)
     scratch_dict: OrderedDict = module.state_dict()
 
     ckpt_path = _resolve_ckpt(pretrained)
@@ -102,26 +136,12 @@ def inject(pretrained: Path, output_dir: Path, config_name: str) -> Path:
     print(f"Only in pretrained (dropped) : {len(only_in_pretrained)} -> {only_in_pretrained}")
     assert matched, "No weights matched - check that the pretrained ckpt is mattergen_base."
 
-    # Write a minimal Lightning checkpoint that trainer.fit(ckpt_path=...) / auto_resume
-    # can restore weights from. epoch/global_step start at 0 so the full fine-tuning
-    # schedule runs. We intentionally do NOT copy optimizer state - fine-tuning starts
-    # a fresh optimizer at the new (small) LR.
+    # Write a Lightning checkpoint with valid loop state. epoch/global_step start at
+    # 0 so the full fine-tuning schedule runs.
     out_ckpt_dir = output_dir / "checkpoints"
     out_ckpt_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_ckpt_dir / "epoch=0-step=0.ckpt"
-    torch.save(
-        {
-            "state_dict": module.state_dict(),
-            "epoch": 0,
-            "global_step": 0,
-            "pytorch-lightning_version": __import__("pytorch_lightning").__version__,
-            "loops": {},
-            "callbacks": {},
-            "optimizer_states": [],
-            "lr_schedulers": [],
-        },
-        out_path,
-    )
+    save_resume_checkpoint(module, config, out_path)
     print(f"\nWarm-start checkpoint written to: {out_path}")
     print(f"Fine-tune with:\n  OUTPUT_DIR={output_dir} mattergen-train --config-name={config_name}")
     return out_path

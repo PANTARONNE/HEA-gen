@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-OUTPUT_DIR=outputs/hea_finetune_run
+export OUTPUT_DIR="${OUTPUT_DIR:-outputs/hea_finetune_run}"
 
-GPUS="${GPUS:-2,6}"
+GPUS="${GPUS:-5,7}"
 export CUDA_VISIBLE_DEVICES="${GPUS}"
 
 NUM_GPUS="$(awk -F',' '{print NF}' <<< "${GPUS}")"
